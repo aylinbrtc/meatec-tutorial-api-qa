@@ -1,15 +1,13 @@
 # Tutorial API QA Suite
 
-Automated testing layer for the JWT & RBAC-based Tutorials REST API. This
-repository contains the test setup script, integration tests, end-to-end
-scenarios, and supporting documentation. The application source lives in
-its own repository and isn't included here.
+Automated testing layer for the JWT & RBAC-based Tutorials REST API. The
+application source lives in its own repository and isn't included here.
 
 ## Prerequisites
 
 - [Docker](https://www.docker.com/) and Docker Compose v2 (`docker compose`,
   not the legacy `docker-compose`)
-- Node.js `18.x` (an `.nvmrc` is provided — run `nvm use` if you use nvm)
+- Node.js `18.x` (an `.nvmrc` is provided, run `nvm use` if you use nvm)
 
 ## 1. Start the application under test
 
@@ -68,6 +66,36 @@ its MongoDB instance:
 Adjust `API_BASE_URL` / `MONGO_URI` if the application is not running on the
 default ports.
 
+## 3. Prepare test data
+
+Once both services are up, seed the baseline test data:
+
+```bash
+npm run setup
+```
+
+This script (`scripts/setup-test-env.js`):
+
+- creates the three test users from `.env` (`TEST_ADMIN_*`, `TEST_MODERATOR_*`,
+  `TEST_USER_*`) through the real signup endpoint, so roles and password
+  hashing go through the application's own logic
+- verifies each user can sign in
+- replaces a small set of tagged tutorials (`[QA Seed] ...`) with fresh,
+  known content, so read tests have deterministic fixtures to assert against
+
+It's safe to run more than once: existing test users are left alone, and
+only the tagged tutorials are reset each time.
+
+Two design decisions worth noting:
+
+- The script checks that the `user`/`moderator`/`admin` roles exist rather
+  than creating them, since the application already seeds these on first
+  boot and recreating them here would just duplicate that logic.
+- Access tokens expire in 60 seconds (see the application's
+  `auth.config.js`), so the script only confirms sign-in works; it doesn't
+  hand out a token for tests to reuse. Each test suite is expected to sign
+  in for itself.
+
 ## Issues encountered
 
 Setup worked on the first try, including a full reset
@@ -78,8 +106,11 @@ gates the app container correctly, so there was nothing to work around.
 
 ```
 qa-suite/
-├── .env.example      # Template for local environment configuration
-├── .nvmrc             # Pinned Node.js version
+├── .env.example           # Template for local environment configuration
+├── .nvmrc                  # Pinned Node.js version
 ├── package.json
-└── README.md          # This file
+├── package-lock.json
+├── scripts/
+│   └── setup-test-env.js   # Test data setup script (Task 2)
+└── README.md               # This file
 ```
