@@ -1,5 +1,4 @@
-// Safe to run multiple times: existing users are left untouched, seeded
-// tutorials are identified by a fixed title tag and replaced on every run.
+// Safe to re-run: existing users stay untouched, tagged tutorials reset each time.
 
 require("dotenv").config();
 
