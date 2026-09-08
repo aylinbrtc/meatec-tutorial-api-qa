@@ -142,6 +142,26 @@ Two tests are expected to fail, on purpose:
 Both assert the documented/expected behavior rather than the application's
 current behavior, so the failure itself is the evidence.
 
+## End-to-end scenarios
+
+Beyond per-endpoint checks, `tests/e2e/` contains two multi-step workflows
+that mirror the case study's own examples, run by the same `npm test`
+command:
+
+- `moderator-content-lifecycle.test.js`: registration, sign-in, create a
+  tutorial, retrieve it, attempt an update, retrieve it again. The last
+  step shows the real-world consequence of the known PUT defect inside a
+  realistic user journey, rather than re-proving the defect itself (that's
+  `tests/tutorials.test.js`'s job).
+- `role-based-resource-actions.test.js`: a single tutorial's full lifecycle
+  across three roles. Admin creates it, moderator and a plain user can both
+  read it, the plain user's and moderator's delete attempts are rejected,
+  only the admin can actually delete it, and it's confirmed gone (404) for
+  every role afterward.
+
+Each scenario validates state transitions between steps, not just each
+call's own response, and cleans up whatever it created.
+
 ## Issues encountered
 
 Setup worked on the first try, including a full reset
@@ -160,11 +180,14 @@ qa-suite/
 │   └── setup-test-env.js      # Test data setup script (Task 2)
 ├── tests/
 │   ├── helpers/
-│   │   ├── api.js              # Supertest client bound to API_BASE_URL
-│   │   ├── auth.js             # Per-suite sign-in helpers
-│   │   └── db.js                # Shared MongoDB connection
+│   │   ├── api.js                          # Supertest client bound to API_BASE_URL
+│   │   ├── auth.js                         # Per-suite sign-in helpers
+│   │   └── db.js                            # Shared MongoDB connection
+│   ├── e2e/
+│   │   ├── moderator-content-lifecycle.test.js
+│   │   └── role-based-resource-actions.test.js
 │   ├── auth.test.js
 │   ├── rbac.test.js
 │   └── tutorials.test.js
-└── README.md                  # This file
+└── README.md                                # This file
 ```
