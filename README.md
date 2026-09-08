@@ -175,7 +175,7 @@ gates the app container correctly, so there was nothing to work around.
 ## Repository structure
 
 ```
-qa-suite/
+meatec-tutorial-api-qa/
 ├── .env.example              # Template for local environment configuration
 ├── .nvmrc                     # Pinned Node.js version
 ├── package.json
