@@ -144,6 +144,23 @@ describe("POST /api/tutorials", () => {
     expect(stored.title).toBe(title);
     expect(stored.published).toBe(true);
   });
+
+  test("defaults published to false when omitted", async () => {
+    const { accessToken } = await asModerator();
+    const title = `qa_created_no_published_${Date.now()}`;
+
+    const res = await api
+      .post("/tutorials")
+      .set("x-access-token", accessToken)
+      .send({ title, description: "published field intentionally omitted" });
+
+    expect(res.status).toBe(200);
+    expect(res.body.published).toBe(false);
+    createdIds.push(new ObjectId(res.body.id));
+
+    const stored = await mongo.collection("tutorials").findOne({ _id: new ObjectId(res.body.id) });
+    expect(stored.published).toBe(false);
+  });
 });
 
 describe("PUT /api/tutorials/:id", () => {

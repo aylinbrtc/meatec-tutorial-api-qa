@@ -127,8 +127,9 @@ Coverage:
   120s TTL)
 - `tests/rbac.test.js`: the `/api/test/*` board endpoints, across all three
   roles plus unauthenticated and invalid-token requests
-- `tests/tutorials.test.js`: full tutorials CRUD, RBAC per operation, and
-  MongoDB state verification for every write
+- `tests/tutorials.test.js`: full tutorials CRUD, RBAC per operation,
+  MongoDB state verification for every write, and the default-`published`
+  path when it's omitted from a create request
 
 Every write is checked against MongoDB directly, not just its HTTP
 response. Read tests assert against the tagged fixtures the setup script
