@@ -96,6 +96,52 @@ Two design decisions worth noting:
   hand out a token for tests to reuse. Each test suite is expected to sign
   in for itself.
 
+## 4. Run the integration tests
+
+```bash
+npm test
+```
+
+This runs `npm run setup` first (via a `pretest` hook), then the Jest suite,
+so every run starts from the same known baseline regardless of what a
+previous run left behind.
+
+Tooling: Jest and Supertest, on top of the `mongodb` driver already used by
+the setup script. The assignment leaves tool choice open; Jest needs no
+extra configuration for a plain CommonJS project, and Supertest keeps HTTP
+assertions (`.expect(200)`) readable. Tests run with `--runInBand`
+(sequentially) rather than Jest's default parallel workers, because several
+suites write to the same MongoDB instance and would otherwise interfere
+with each other, for example one test wiping tutorials while another reads
+them.
+
+Coverage:
+
+- `tests/auth.test.js`: signup, signin, and refresh token, including the
+  default-role signup path and an expired-refresh-token case (the token's
+  expiry is backdated directly in MongoDB rather than waiting out the real
+  120s TTL)
+- `tests/rbac.test.js`: the `/api/test/*` board endpoints, across all three
+  roles plus unauthenticated and invalid-token requests
+- `tests/tutorials.test.js`: full tutorials CRUD, RBAC per operation, and
+  MongoDB state verification for every write
+
+Every write is checked against MongoDB directly, not just its HTTP
+response. Read tests assert against the tagged fixtures the setup script
+creates, so results are deterministic.
+
+Two tests are expected to fail, on purpose:
+
+- `PUT /api/tutorials/:id › persists the updated fields to the database`:
+  reproduces a real defect (see the bug report). The endpoint returns 200
+  but never writes the update to MongoDB.
+- `GET /api/test/mod › allows an admin, per the documented contract`: the
+  route only checks for the `moderator` role, not `moderator` or `admin`
+  as documented, so a pure-admin account is rejected.
+
+Both assert the documented/expected behavior rather than the application's
+current behavior, so the failure itself is the evidence.
+
 ## Issues encountered
 
 Setup worked on the first try, including a full reset
@@ -106,11 +152,19 @@ gates the app container correctly, so there was nothing to work around.
 
 ```
 qa-suite/
-├── .env.example           # Template for local environment configuration
-├── .nvmrc                  # Pinned Node.js version
+├── .env.example              # Template for local environment configuration
+├── .nvmrc                     # Pinned Node.js version
 ├── package.json
 ├── package-lock.json
 ├── scripts/
-│   └── setup-test-env.js   # Test data setup script (Task 2)
-└── README.md               # This file
+│   └── setup-test-env.js      # Test data setup script (Task 2)
+├── tests/
+│   ├── helpers/
+│   │   ├── api.js              # Supertest client bound to API_BASE_URL
+│   │   ├── auth.js             # Per-suite sign-in helpers
+│   │   └── db.js                # Shared MongoDB connection
+│   ├── auth.test.js
+│   ├── rbac.test.js
+│   └── tutorials.test.js
+└── README.md                  # This file
 ```
