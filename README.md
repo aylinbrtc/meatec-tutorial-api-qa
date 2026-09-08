@@ -3,6 +3,10 @@
 Automated testing layer for the JWT & RBAC-based Tutorials REST API. The
 application source lives in its own repository and isn't included here.
 
+The known defect found during testing is documented in
+[`BUG_REPORT.md`](./BUG_REPORT.md); tooling and design decisions, plus a
+few smaller findings, are in [`NOTES.md`](./NOTES.md).
+
 ## Prerequisites
 
 - [Docker](https://www.docker.com/) and Docker Compose v2 (`docker compose`,
