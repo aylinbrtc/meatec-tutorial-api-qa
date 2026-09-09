@@ -1,16 +1,15 @@
 {
   "name": "meatec-tutorial-api-qa",
   "version": "1.0.0",
-  "main": "index.js",
   "scripts": {
     "setup": "node scripts/setup-test-env.js",
     "pretest": "npm run setup",
     "test": "jest --runInBand"
   },
   "keywords": [],
-  "author": "",
+  "author": "Aylin Barutcu",
   "license": "ISC",
-  "description": "",
+  "description": "Automated integration and end-to-end test suite for the JWT & RBAC-based Tutorials REST API case study.",
   "engines": { "node": ">=18 <19" },
   "dependencies": {
     "dotenv": "^16.4.5",
